@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/anonymous-artist
+    username: admin_boookstore
+    password: boo0kstore
+    driver-class-name: org.postgresql.Driver
+
+  security:
+    user:
+      name: admin
+      password: admin
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
