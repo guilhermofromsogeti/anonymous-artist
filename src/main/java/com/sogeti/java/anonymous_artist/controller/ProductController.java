@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("anonymous-artist/api/products/")
+@RequestMapping("/anonymous-artist/api/products/")
 public class ProductController {
 
 
@@ -37,6 +37,13 @@ public class ProductController {
                 .map(ProductMapper::fromProductDtoToProductResponse)
                 .toList();
         return ResponseEntity.ok().body(productResponseList);
+    }
+
+    @GetMapping("{id}")
+    public ResponseEntity<ProductResponse> getProductById(@PathVariable UUID id) {
+        ProductDto productDto = productService.getProductById(id);
+        ProductResponse productResponse = ProductMapper.fromProductDtoToProductResponse(productDto);
+        return ResponseEntity.ok().body(productResponse);
     }
 
 

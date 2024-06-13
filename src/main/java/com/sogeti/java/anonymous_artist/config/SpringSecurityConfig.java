@@ -53,6 +53,7 @@ public class SpringSecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/anonymous-artist/api/products/").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.PUT, "/anonymous-artist/api/products/").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.GET, "/anonymous-artist/api/products/").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/anonymous-artist/api/products/{id}").permitAll()
 
                                 .requestMatchers(HttpMethod.POST, "/anonymous-artist/api/cart/add/").hasAnyRole("USER", "ADMIN")
                                 .requestMatchers(HttpMethod.PUT, "/anonymous-artist/api/cart/edit/").hasAnyRole("USER", "ADMIN")
@@ -63,7 +64,6 @@ public class SpringSecurityConfig {
 
                                 .requestMatchers(HttpMethod.POST, "/anonymous-artist/api/authenticate").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/anonymous-artist/api/login").permitAll()
-
 
                                 .anyRequest().permitAll())
                         .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)

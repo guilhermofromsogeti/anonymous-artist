@@ -49,16 +49,16 @@ public class CartService {
         return cartRepository.findCartByUserMembershipId(account.getUser().getMembershipId());
     }
 
-    public Optional<CartItem> returnOptionalCartItemFromCartByIsbn(Cart cart, UUID isbn) {
+    public Optional<CartItem> returnOptionalCartItemFromCartById(Cart cart, UUID id) {
         return cart.getCartItemList().stream()
-                .filter(cartItem -> cartItem.getId().equals(isbn)).findFirst();
+                .filter(cartItem -> cartItem.getId().equals(id)).findFirst();
     }
 
-    public CartItem returnCartItemFromCartByIsbn(Cart cart, String isbn) {
+    public CartItem returnCartItemFromCartById(Cart cart, UUID id) {
         return cart.getCartItemList().stream()
-                .filter(cartItem -> cartItem.getId().equals(isbn))
+                .filter(cartItem -> cartItem.getId().equals(id))
                 .findFirst()
-                .orElseThrow(() -> new NoDataFoundException("Cart item with ISBN " + isbn + " not found"));
+                .orElseThrow(() -> new NoDataFoundException("Cart item with id " + id + " not found"));
     }
 
     public void addCartItemToCart(CartItemDto cartItemDto) {
@@ -68,7 +68,7 @@ public class CartService {
         Cart cart = getCurrentUserCart();
         Product product = findProductById(receivedID);
 
-        Optional<CartItem> optionalCartItem = returnOptionalCartItemFromCartByIsbn(cart, receivedID);
+        Optional<CartItem> optionalCartItem = returnOptionalCartItemFromCartById(cart, receivedID);
 
         if (optionalCartItem.isPresent()) {
             CartItem cartItem = optionalCartItem.get();
@@ -90,7 +90,7 @@ public class CartService {
         if (newQuantity == 0) {
             return removeCartItemFromCart(cart, id);
         } else {
-            CartItem itemToEdit = returnCartItemFromCartByIsbn(cart, String.valueOf(id));
+            CartItem itemToEdit = returnCartItemFromCartById(cart, id);
             cartItemService.replaceQuantityExistingCartItem(cart, itemToEdit, newQuantity);
             updateCartTotalPrice(cart);
         }
@@ -99,8 +99,8 @@ public class CartService {
 
     }
 
-    String removeCartItemFromCart(Cart cart, UUID isbn) {
-        Optional<CartItem> optionalCartItem = returnOptionalCartItemFromCartByIsbn(cart, isbn);
+    String removeCartItemFromCart(Cart cart, UUID id) {
+        Optional<CartItem> optionalCartItem = returnOptionalCartItemFromCartById(cart, id);
         if (optionalCartItem.isPresent()) {
             CartItem cartItem = optionalCartItem.get();
 
