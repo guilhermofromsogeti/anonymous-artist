@@ -72,6 +72,8 @@ public class ApplicationExceptionHandler extends RuntimeException {
     public static ResponseEntity<String> handleTokenInvalidationException(TokenInvalidationException exception) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(exception.getMessage());
     }
+
+
 }
 
 

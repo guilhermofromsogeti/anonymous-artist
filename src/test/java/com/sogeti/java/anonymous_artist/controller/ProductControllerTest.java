@@ -65,6 +65,9 @@ class ProductControllerTest {
     @MockBean
     private ProductService productService;
 
+    @MockBean
+    ImageController imageController;
+
     @Test
     @WithAnonymousUser
     void givenProductExists_whenGetProductById_thenReturnProductResponse() throws Exception {
@@ -76,7 +79,7 @@ class ProductControllerTest {
         when(productService.getProductById(product.id())).thenReturn(product);
 
         // Then
-        mockMvc.perform(get("/anonymous-artist/api/products/" + product.id()))
+        mockMvc.perform(get("/anonymous-artist/api/product/" + product.id()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("id").value(productResponse.id().toString()))
                 .andExpect(jsonPath("title").value(productResponse.title()))
@@ -99,7 +102,7 @@ class ProductControllerTest {
         when(productService.getProductById(idToFind)).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "No product found by id."));
 
         // Then
-        mockMvc.perform(get("/anonymous-artist/api/products/{id}", idToFind))
+        mockMvc.perform(get("/anonymous-artist/api/product/{id}", idToFind))
                 .andExpect(status().isNotFound());
     }
 
@@ -119,7 +122,7 @@ class ProductControllerTest {
         when(productService.getListOfAllProducts()).thenReturn(listOfProductDtos);
 
         // Then
-        mockMvc.perform(get("/anonymous-artist/api/products/"))
+        mockMvc.perform(get("/anonymous-artist/api/product/"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("size()").value(2))
                 .andExpect(jsonPath("[0].id").value(productDtoList.get(0).id().toString()))
@@ -150,7 +153,7 @@ class ProductControllerTest {
         when(productService.getListOfAllProducts()).thenReturn(productDtoList);
 
         // Then
-        mockMvc.perform(get("/anonymous-artist/api/products/"))
+        mockMvc.perform(get("/anonymous-artist/api/product/"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("size()").value(0));
 
@@ -170,7 +173,7 @@ class ProductControllerTest {
         when(productService.registerNewProduct(newProduct)).thenReturn(newProduct);
 
         // Then
-        MvcResult mvcResult = mockMvc.perform(post("/anonymous-artist/api/products/")
+        MvcResult mvcResult = mockMvc.perform(post("/anonymous-artist/api/product/")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validProductRequest))
                         .accept(MediaType.APPLICATION_JSON))
@@ -197,7 +200,7 @@ class ProductControllerTest {
         when(productService.registerNewProduct(any(ProductDto.class))).thenThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST));
 
         // Then
-        mockMvc.perform(post("/anonymous-artist/api/products/")
+        mockMvc.perform(post("/anonymous-artist/api/product/")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidProductRequest))
                         .accept(MediaType.APPLICATION_JSON))
@@ -219,7 +222,7 @@ class ProductControllerTest {
         when(productService.updateExistingProduct(existingId, ProductToEdit)).thenReturn(ProductToEdit);
 
         // Then
-        MvcResult mvcResult = mockMvc.perform(put("/anonymous-artist/api/products/{id}", existingId)
+        MvcResult mvcResult = mockMvc.perform(put("/anonymous-artist/api/product/{id}", existingId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(newProductInfo))
                         .accept(MediaType.APPLICATION_JSON))
@@ -257,7 +260,7 @@ class ProductControllerTest {
         }).when(productService).updateExistingProduct(eq(existingId), any(ProductDto.class));
 
         // Then
-        mockMvc.perform(put("/anonymous-artist/api/products/{id}", existingId)
+        mockMvc.perform(put("/anonymous-artist/api/product/{id}", existingId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequest))
                         .accept(MediaType.APPLICATION_JSON))

@@ -5,7 +5,9 @@ import com.sogeti.java.anonymous_artist.exception.NoDataFoundException;
 import com.sogeti.java.anonymous_artist.exception.ProductAlreadyExistException;
 import com.sogeti.java.anonymous_artist.exception.ProductNotFoundException;
 import com.sogeti.java.anonymous_artist.mapper.ProductMapper;
+import com.sogeti.java.anonymous_artist.model.FileUploadResponse;
 import com.sogeti.java.anonymous_artist.model.Product;
+import com.sogeti.java.anonymous_artist.repository.FileUploadRepository;
 import com.sogeti.java.anonymous_artist.repository.ProductRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,15 +16,18 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final FileUploadRepository fileUploadRepository;
 
-    public ProductService(ProductRepository productRepository) {
+    public ProductService(ProductRepository productRepository, FileUploadRepository fileUploadRepository) {
         this.productRepository = productRepository;
+        this.fileUploadRepository = fileUploadRepository;
     }
 
 
@@ -89,21 +94,38 @@ public class ProductService {
         return ProductMapper.fromProductToProductDto(newProduct);
     }
 
-    public ProductDto updateExistingProduct(UUID idToUpdate, ProductDto bookDto) {
+    public ProductDto updateExistingProduct(UUID idToUpdate, ProductDto productDto) {
 
-        Product bookToUpdate = productRepository.findById(idToUpdate)
+        Product productToUpdate = productRepository.findById(idToUpdate)
                 .orElseThrow(() -> new NoDataFoundException("Product with id " + idToUpdate + " not found"));
-        bookToUpdate.setTitle(bookDto.title());
-        if (!Objects.equals(bookDto.smallSummary(), bookToUpdate.getSmallSummary())) {
-            bookToUpdate.setSmallSummary(bookDto.smallSummary());
+        productToUpdate.setTitle(productDto.title());
+        if (!Objects.equals(productDto.smallSummary(), productToUpdate.getSmallSummary())) {
+            productToUpdate.setSmallSummary(productDto.smallSummary());
         }
-        if (!Objects.equals(bookDto.description(), bookToUpdate.getDescription())) {
-            bookToUpdate.setDescription(bookDto.description());
+        if (!Objects.equals(productDto.description(), productToUpdate.getDescription())) {
+            productToUpdate.setDescription(productDto.description());
         }
-        bookToUpdate.setPrice(bookDto.price());
-        bookToUpdate.setAmountInStock(bookDto.amountInStock());
-        productRepository.save(bookToUpdate);
+        productToUpdate.setPrice(productDto.price());
+        productToUpdate.setAmountInStock(productDto.amountInStock());
+        productRepository.save(productToUpdate);
 
-        return ProductMapper.fromProductToProductDto(bookToUpdate);
+        return ProductMapper.fromProductToProductDto(productToUpdate);
+    }
+
+    public void assignImageToProduct(String fileName, UUID productId) {
+        Optional<Product> optionalProduct = productRepository.findById(productId);
+        Optional<FileUploadResponse> fileUploadResponse = fileUploadRepository.findByFileName(fileName);
+
+        if (optionalProduct.isPresent() && fileUploadResponse.isPresent()) {
+            FileUploadResponse image = fileUploadResponse.get();
+            Product product = optionalProduct.get();
+
+            product.addImage(image);
+            image.setProduct(product);
+            productRepository.save(product);
+            ProductMapper.fromProductToProductDto(product);
+        } else {
+            throw new NoDataFoundException("no product found with this id: " + productId);
+        }
     }
 }

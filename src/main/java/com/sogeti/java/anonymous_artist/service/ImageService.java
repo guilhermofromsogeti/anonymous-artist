@@ -2,8 +2,8 @@ package com.sogeti.java.anonymous_artist.service;
 
 import com.sogeti.java.anonymous_artist.model.FileUploadResponse;
 import com.sogeti.java.anonymous_artist.repository.FileUploadRepository;
+import com.sogeti.java.anonymous_artist.util.FilePathUtil;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -21,50 +21,69 @@ import java.util.Objects;
 @Service
 public class ImageService {
 
-    @Value("${my.upload_location}")
-    private Path fileStoragePath;
-    private final String fileStorageLocation;
+    private final Path fileStoragePath;
     private final FileUploadRepository fileUploadRepository;
+    private final String fileStorageLocation;
 
     public ImageService(@Value("${my.upload_location}") String fileStorageLocation, FileUploadRepository fileUploadRepository) {
-        fileStoragePath = Paths.get(fileStorageLocation).toAbsolutePath().normalize();
-
+        this.fileStoragePath = Paths.get(fileStorageLocation).toAbsolutePath().normalize();
         this.fileStorageLocation = fileStorageLocation;
         this.fileUploadRepository = fileUploadRepository;
 
+        createDirectories(fileStoragePath);
+    }
+
+    private void createDirectories(Path path) {
         try {
-            Files.createDirectories(fileStoragePath);
+            Files.createDirectories(path);
+        } catch (IOException e) {
+            throw new RuntimeException("Issue in creating file directory", e);
+        }
+    }
+
+    public String storeFile(MultipartFile file, String url) {
+        String fileName = generateFileName(file);
+        Path filePath = FilePathUtil.resolveFilePath(fileStorageLocation, fileName);
+
+        copyFileToStorage(file, filePath);
+        saveFileMetadata(fileName, file.getContentType(), url);
+
+        return fileName;
+    }
+
+
+    private String generateFileName(MultipartFile file) {
+        return StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
+    }
+
+    private void copyFileToStorage(MultipartFile file, Path filePath) {
+        try {
+            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             throw new RuntimeException("Issue in creating file directory");
         }
     }
 
-
-    public String storeFile(MultipartFile file, String url) {
-        String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
-        Path filePath = Paths.get(fileStoragePath + "/" + fileName);
-        try {
-            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException ioException) {
-            throw new RuntimeException("Issue in storing the file", ioException);
-        }
-        fileUploadRepository.save(new FileUploadResponse(fileName, file.getContentType(), url));
-        return fileName;
+    private void saveFileMetadata(String fileName, String contentType, String url) {
+        fileUploadRepository.save(new FileUploadResponse(fileName, contentType, url));
     }
 
+    private Resource loadResource(Path filePath) {
+        try {
+            return new UrlResource(filePath.toUri());
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("Issue in reading the file", e);
+        }
+    }
 
     public Resource downLoadFile(String fileName) {
-        Path path = Paths.get(fileStorageLocation).toAbsolutePath().resolve(fileName);
-        Resource resource;
-        try {
-            resource = new UrlResource(path.toUri());
-        } catch (MalformedURLException malformedURLException) {
-            throw new RuntimeException("Issue in reading the file", malformedURLException);
-        }
+        Path filePath = FilePathUtil.resolveFilePath(fileStorageLocation, fileName);
+        Resource resource = loadResource(filePath);
+
         if (resource.exists() && resource.isReadable()) {
             return resource;
         } else {
-            throw new RuntimeException("the file doesn't exist or not readable");
+            throw new RuntimeException("The file doesn't exist or is not readable");
         }
     }
 }

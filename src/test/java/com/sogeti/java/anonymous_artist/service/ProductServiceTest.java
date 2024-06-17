@@ -7,6 +7,7 @@ import com.sogeti.java.anonymous_artist.exception.ProductNotFoundException;
 import com.sogeti.java.anonymous_artist.factory.ProductFactory;
 import com.sogeti.java.anonymous_artist.mapper.ProductMapper;
 import com.sogeti.java.anonymous_artist.model.Product;
+import com.sogeti.java.anonymous_artist.repository.FileUploadRepository;
 import com.sogeti.java.anonymous_artist.repository.ProductRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,6 +50,8 @@ class ProductServiceTest {
 
     @Mock
     private ProductRepository productRepository;
+    @Mock
+    private FileUploadRepository fileUploadRepository;
 
     @InjectMocks
     private ProductService productService;
@@ -231,7 +234,7 @@ class ProductServiceTest {
         // When
         when(securityContext.getAuthentication()).thenReturn(authentication);
 
-        ProductService productService = new ProductService(productRepository);
+        ProductService productService = new ProductService(productRepository, fileUploadRepository);
         List<String> roles = productService.getUserRoles();
 
         // Then
@@ -251,7 +254,7 @@ class ProductServiceTest {
         when(securityContext.getAuthentication()).thenReturn(authentication);
 
         // When
-        ProductService productService1 = new ProductService(productRepository);
+        ProductService productService1 = new ProductService(productRepository, fileUploadRepository);
         List<String> roles = productService1.getUserRoles();
 
         // Then

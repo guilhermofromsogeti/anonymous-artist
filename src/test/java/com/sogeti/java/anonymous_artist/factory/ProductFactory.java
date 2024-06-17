@@ -1,7 +1,9 @@
 package com.sogeti.java.anonymous_artist.factory;
 
 import com.github.javafaker.Faker;
+import com.sogeti.java.anonymous_artist.dto.ImageDto;
 import com.sogeti.java.anonymous_artist.dto.ProductDto;
+import com.sogeti.java.anonymous_artist.mapper.ImageMapper;
 import com.sogeti.java.anonymous_artist.model.Product;
 import com.sogeti.java.anonymous_artist.request.ProductRequest;
 import com.sogeti.java.anonymous_artist.response.ProductResponse;
@@ -9,6 +11,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -63,7 +66,8 @@ public class ProductFactory {
                 productRequest.smallSummary(),
                 productRequest.description(),
                 productRequest.price(),
-                productRequest.amountInStock());
+                productRequest.amountInStock(),
+                productRequest.imageDto());
     }
 
     public static ProductDto.ProductDtoBuilder aProductDto() {
@@ -98,13 +102,20 @@ public class ProductFactory {
     }
 
     public static ProductDto fromProductToProductDto(Product product) {
+        List<ImageDto> imageDtos = null;
+        if (product.getImage() != null) {
+            imageDtos = product.getImage().stream()
+                    .map(ImageMapper::fromImage)
+                    .toList();
+        }
         return new ProductDto(
                 product.getId(),
                 product.getTitle(),
                 product.getSmallSummary(),
                 product.getDescription(),
                 product.getPrice(),
-                product.getAmountInStock()
+                product.getAmountInStock(),
+                imageDtos
         );
     }
 }

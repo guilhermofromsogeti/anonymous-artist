@@ -65,6 +65,18 @@ public class SpringSecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/anonymous-artist/api/authenticate").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/anonymous-artist/api/login").permitAll()
 
+                                .requestMatchers(HttpMethod.POST, "/anonymous-artist/api/image/*").hasRole("ADMIN")
+
+                                .requestMatchers(HttpMethod.GET, "/anonymous-artist/api/image/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/anonymous-artist/api/image/**").hasRole("ADMIN")
+
+                                .requestMatchers(HttpMethod.GET, "/anonymous-artist/api/product").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/anonymous-artist/api/product/{id}").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/anonymous-artist/api/product/").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.PUT, "/anonymous-artist/api/product/{id}").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/anonymous-artist/api/product/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/anonymous-artist/api/product/{id}/image").hasRole("ADMIN")
+
                                 .anyRequest().permitAll())
                         .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
                         .exceptionHandling(exceptionHandling -> exceptionHandling.accessDeniedHandler(accessDeniedHandler()))
