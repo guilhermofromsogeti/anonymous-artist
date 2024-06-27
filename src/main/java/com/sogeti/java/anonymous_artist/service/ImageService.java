@@ -1,5 +1,6 @@
 package com.sogeti.java.anonymous_artist.service;
 
+import com.sogeti.java.anonymous_artist.exception.NoDataFoundException;
 import com.sogeti.java.anonymous_artist.model.FileUploadResponse;
 import com.sogeti.java.anonymous_artist.repository.FileUploadRepository;
 import com.sogeti.java.anonymous_artist.util.FilePathUtil;
@@ -85,5 +86,13 @@ public class ImageService {
         } else {
             throw new RuntimeException("The file doesn't exist or is not readable");
         }
+    }
+
+    //should delete by UUID
+    public void deleteImage(Long fileName) {
+        if (!fileUploadRepository.existsById(fileName)) {
+            throw new NoDataFoundException(fileName.toString());
+        }
+        fileUploadRepository.deleteById(fileName);
     }
 }

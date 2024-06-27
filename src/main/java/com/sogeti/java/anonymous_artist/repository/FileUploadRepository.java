@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface FileUploadRepository extends JpaRepository<FileUploadResponse, String > {
+public interface FileUploadRepository extends JpaRepository<FileUploadResponse, Long > {
     Optional<FileUploadResponse> findByFileName(String fileName);
 }

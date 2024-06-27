@@ -7,6 +7,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -24,8 +25,9 @@ import java.util.UUID;
 public class FileUploadResponse {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "image_sequence")
+    @SequenceGenerator(name = "image_sequence", sequenceName = "image_sequence", initialValue = 26, allocationSize = 1)
+    private Long id;
     private String fileName;
     private String contentType;
     private String url;
