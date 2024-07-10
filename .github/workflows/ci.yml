@@ -75,4 +75,10 @@ jobs:
       - name: output information
         run: |
           echo "something went wrong"
-          echo {{ toJSON(github)}}
+          echo ${{ toJSON(github)}}
+
+      - name: Upload test report
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-report
+          path: target/surefire-reports
