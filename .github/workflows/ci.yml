@@ -31,7 +31,15 @@ jobs:
           restore-keys: |
               ${{ runner.os }}-maven-
       - name: Run tests
+        id: run-tests
         run: mvn test
+      - name: Upload test report
+        if: failure() && steps.run-tests.outcome == 'failure
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-report
+          path: test.json
+
   deploy:
     needs: test
     runs-on: ubuntu-latest
@@ -58,3 +66,13 @@ jobs:
 
       - name: Deploy
         run: echo "Deploying..."
+
+  report:
+    needs: deploy
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: output information
+        run: |
+          echo "something went wrong"
+          echo {{ toJSON(github)}}
