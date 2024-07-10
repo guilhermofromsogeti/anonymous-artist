@@ -78,7 +78,7 @@ class RegistrationControllerTest {
                         .content(objectMapper.writeValueAsString(validRegistrationRequest))
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isCreated())
                 .andExpect(header().exists("Location"))
                 .andExpect(header().string("Location", "http://localhost/anonymous-artist/api/user/" + newAccount.getEmail()))
                 .andReturn();
