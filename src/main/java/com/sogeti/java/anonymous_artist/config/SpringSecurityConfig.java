@@ -50,11 +50,6 @@ public class SpringSecurityConfig {
                         .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                         .csrf(AbstractHttpConfigurer::disable)
                         .authorizeHttpRequests(auth -> auth
-                                .requestMatchers(HttpMethod.POST, "/anonymous-artist/api/products/").hasRole("ADMIN")
-                                .requestMatchers(HttpMethod.PUT, "/anonymous-artist/api/products/").hasRole("ADMIN")
-                                .requestMatchers(HttpMethod.GET, "/anonymous-artist/api/products/").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/anonymous-artist/api/products/{id}").permitAll()
-
                                 .requestMatchers(HttpMethod.POST, "/anonymous-artist/api/cart/add/").hasAnyRole("USER", "ADMIN")
                                 .requestMatchers(HttpMethod.PUT, "/anonymous-artist/api/cart/edit/").hasAnyRole("USER", "ADMIN")
                                 .requestMatchers(HttpMethod.GET, "/anonymous-artist/api/cart/").hasAnyRole("USER", "ADMIN")
@@ -62,7 +57,7 @@ public class SpringSecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/anonymous-artist/api/order/").hasAnyRole("USER", "ADMIN")
                                 .requestMatchers(HttpMethod.GET, "/anonymous-artist/api/order/history/").hasAnyRole("USER", "ADMIN")
 
-                                .requestMatchers(HttpMethod.POST, "/anonymous-artist/api/authenticate").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/anonymous-artist/api/auth/authenticate").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/anonymous-artist/api/login").permitAll()
 
                                 .requestMatchers(HttpMethod.POST, "/anonymous-artist/api/image/*").hasRole("ADMIN")

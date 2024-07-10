@@ -22,6 +22,7 @@ import java.util.Objects;
 @Service
 public class ImageService {
 
+    // todo: change RuntimeException to a custom exception handler
     private final Path fileStoragePath;
     private final FileUploadRepository fileUploadRepository;
     private final String fileStorageLocation;
