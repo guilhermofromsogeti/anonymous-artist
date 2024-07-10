@@ -34,7 +34,7 @@ jobs:
         id: run-tests
         run: mvn test
       - name: Upload test report
-        if: failure() && steps.run-tests.outcome == 'failure
+        if: failure() && steps.run-tests.outcome == 'failure'
         uses: actions/upload-artifact@v3
         with:
           name: test-report
