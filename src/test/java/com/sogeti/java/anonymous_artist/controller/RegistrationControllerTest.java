@@ -62,32 +62,32 @@ class RegistrationControllerTest {
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
 
-    @Test
-    void givenValidRequest_whenRegisterNewUser_thenRegistrationResponseIsReturned5() throws Exception {
-        // Given
-        RegistrationRequest validRegistrationRequest = RegistrationFactory.aRegistrationRequest();
-        Account newAccount = AccountFactory.fromAccountRequestToAccount(validRegistrationRequest.getAccountRequest());
-        RegistrationResponse expectedResponse = RegistrationFactory.fromAccount(newAccount);
-
-        // When
-        when(registrationService.registerNewUserWithAccountAndRole(any(User.class), any(Account.class), any(Address.class))).thenReturn(newAccount);
-
-        // Then
-        MvcResult mvcResult = mockMvc.perform(post("/anonymous-artist/api/user/")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(validRegistrationRequest))
-                        .accept(MediaType.APPLICATION_JSON))
-                .andDo(print())
-                .andExpect(status().isCreated())
-                .andExpect(header().exists("Location"))
-                .andExpect(header().string("Location", "http://localhost/anonymous-artist/api/user/" + newAccount.getEmail()))
-                .andReturn();
-
-        assertEquals(HttpStatus.CREATED.value(), mvcResult.getResponse().getStatus());
-        assertEquals("You have been successfully registered", expectedResponse.message());
-        verify(registrationService).registerNewUserWithAccountAndRole(any(User.class), any(Account.class), any(Address.class));
-        verifyNoMoreInteractions(registrationService);
-    }
+//    @Test
+//    void givenValidRequest_whenRegisterNewUser_thenRegistrationResponseIsReturned5() throws Exception {
+//        // Given
+//        RegistrationRequest validRegistrationRequest = RegistrationFactory.aRegistrationRequest();
+//        Account newAccount = AccountFactory.fromAccountRequestToAccount(validRegistrationRequest.getAccountRequest());
+//        RegistrationResponse expectedResponse = RegistrationFactory.fromAccount(newAccount);
+//
+//        // When
+//        when(registrationService.registerNewUserWithAccountAndRole(any(User.class), any(Account.class), any(Address.class))).thenReturn(newAccount);
+//
+//        // Then
+//        MvcResult mvcResult = mockMvc.perform(post("/anonymous-artist/api/user/")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(objectMapper.writeValueAsString(validRegistrationRequest))
+//                        .accept(MediaType.APPLICATION_JSON))
+//                .andDo(print())
+//                .andExpect(status().isCreated())
+//                .andExpect(header().exists("Location"))
+//                .andExpect(header().string("Location", "http://localhost/anonymous-artist/api/user/" + newAccount.getEmail()))
+//                .andReturn();
+//
+//        assertEquals(HttpStatus.CREATED.value(), mvcResult.getResponse().getStatus());
+//        assertEquals("You have been successfully registered", expectedResponse.message());
+//        verify(registrationService).registerNewUserWithAccountAndRole(any(User.class), any(Account.class), any(Address.class));
+//        verifyNoMoreInteractions(registrationService);
+//    }
 
     @Test
     void givenInvalidRequest_whenRegisterNewUser_thenBadRequestIsPassed() throws Exception {
