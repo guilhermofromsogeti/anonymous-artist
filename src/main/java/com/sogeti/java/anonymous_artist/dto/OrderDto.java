@@ -13,6 +13,5 @@ public record OrderDto(
         String email,
         String phoneNumber,
         LocalDateTime dateOfOrder
-
 ) {
 }

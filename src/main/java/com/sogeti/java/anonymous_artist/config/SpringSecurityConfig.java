@@ -50,10 +50,6 @@ public class SpringSecurityConfig {
                         .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                         .csrf(AbstractHttpConfigurer::disable)
                         .authorizeHttpRequests(auth -> auth
-                                .requestMatchers(HttpMethod.POST, "/anonymous-artist/api/products/").hasRole("ADMIN")
-                                .requestMatchers(HttpMethod.PUT, "/anonymous-artist/api/products/").hasRole("ADMIN")
-                                .requestMatchers(HttpMethod.GET, "/anonymous-artist/api/products/").permitAll()
-
                                 .requestMatchers(HttpMethod.POST, "/anonymous-artist/api/cart/add/").hasAnyRole("USER", "ADMIN")
                                 .requestMatchers(HttpMethod.PUT, "/anonymous-artist/api/cart/edit/").hasAnyRole("USER", "ADMIN")
                                 .requestMatchers(HttpMethod.GET, "/anonymous-artist/api/cart/").hasAnyRole("USER", "ADMIN")
@@ -61,9 +57,20 @@ public class SpringSecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/anonymous-artist/api/order/").hasAnyRole("USER", "ADMIN")
                                 .requestMatchers(HttpMethod.GET, "/anonymous-artist/api/order/history/").hasAnyRole("USER", "ADMIN")
 
-                                .requestMatchers(HttpMethod.POST, "/anonymous-artist/api/authenticate").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/anonymous-artist/api/auth/authenticate").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/anonymous-artist/api/login").permitAll()
 
+                                .requestMatchers(HttpMethod.POST, "/anonymous-artist/api/image/*").hasRole("ADMIN")
+
+                                .requestMatchers(HttpMethod.GET, "/anonymous-artist/api/image/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/anonymous-artist/api/image/**").hasRole("ADMIN")
+
+                                .requestMatchers(HttpMethod.GET, "/anonymous-artist/api/product").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/anonymous-artist/api/product/{id}").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/anonymous-artist/api/product/").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.PUT, "/anonymous-artist/api/product/{id}").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/anonymous-artist/api/product/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/anonymous-artist/api/product/{id}/image").hasRole("ADMIN")
 
                                 .anyRequest().permitAll())
                         .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)

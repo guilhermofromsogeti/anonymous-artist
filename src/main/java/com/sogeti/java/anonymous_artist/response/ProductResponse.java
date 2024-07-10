@@ -12,7 +12,7 @@ public record ProductResponse(
         String smallSummary,
         String description,
         BigDecimal price,
-        Long amountInStock
+        Integer amountInStock
 ) {
 
 }

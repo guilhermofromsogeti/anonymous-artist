@@ -1,5 +1,6 @@
 package com.sogeti.java.anonymous_artist.service;
 
+import com.sogeti.java.anonymous_artist.exception.NoDataFoundException;
 import com.sogeti.java.anonymous_artist.exception.ProductNotFoundException;
 import com.sogeti.java.anonymous_artist.model.Cart;
 import com.sogeti.java.anonymous_artist.model.CartItem;
@@ -12,6 +13,8 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class CartItemService {
@@ -35,6 +38,15 @@ public class CartItemService {
         cartItemRepository.save(newCartItem);
 
         return newCartItem;
+    }
+
+    protected CartItem findCartItemById(UUID id) {
+        return cartItemRepository.findById(id).orElseThrow(
+                () -> new NoDataFoundException("Cart item with Id " + id + " not found"));
+    }
+
+    public Optional<CartItem> returnOptionalCartItemById(UUID id) {
+        return cartItemRepository.findById(id);
     }
 
     public void replaceQuantityExistingCartItem(Cart cart, CartItem itemToEdit, int newQuantity) {
