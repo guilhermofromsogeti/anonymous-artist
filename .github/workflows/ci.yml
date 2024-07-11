@@ -3,16 +3,17 @@ name: CI
 on:
   push:
     branches:
-      - main
       - development
   pull_request:
     branches:
-      - main
       - development
+    types:
+      - closed
   workflow_dispatch:
 
 jobs:
   test:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
     runs-on: ubuntu-latest
     steps:
       - name: Get code
@@ -41,6 +42,7 @@ jobs:
           path: target/surefire-reports
 
   deploy:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
     needs: test
     runs-on: ubuntu-latest
     steps:
