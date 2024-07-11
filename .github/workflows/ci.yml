@@ -83,8 +83,6 @@ jobs:
         run: |
           echo "something went wrong"
 #          echo "${{ toJSON(github) }}"
-          echo "Something went wrong"
-          echo "${{ toJSON(github) }}"
 
       - name: Upload test report
         uses: actions/upload-artifact@v3
