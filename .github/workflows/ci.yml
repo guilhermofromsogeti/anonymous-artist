@@ -3,6 +3,7 @@ name: CI
 on:
   push:
     branches:
+      - main
       - development
   workflow_dispatch:
 
@@ -35,7 +36,7 @@ jobs:
         if: failure() && steps.run-tests.outcome == 'failure'
         uses: actions/upload-artifact@v3
         with:
-          name: test-report
+          name: test-results
           path: target/surefire-reports
 
   deploy:
@@ -79,4 +80,9 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: test-report
-          path: target/surefire-reports
+          path: | 
+            target/surefire-reports/*.txt
+            target/surefire-reports/*.xml
+        if-no-files-found:
+         error
+          
