@@ -115,7 +115,7 @@
                 <version>3.3.0</version>
                 <configuration>
                     <reportsDirectory>
-                        ${project.build.directory}
+                        ${project.build.directory}/surefire-reports
                     </reportsDirectory>
                 </configuration>
             </plugin>
