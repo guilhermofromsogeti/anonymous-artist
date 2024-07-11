@@ -38,7 +38,7 @@ class AccountServiceTest {
     void givenExistingAccount_whenAccountExist_thenReturnsTrue() {
         // Given
         String existingEmail = "existing@example.com";
-        when(accountRepository.existsById(existingEmail)).thenReturn(true);
+        when(accountRepo.existsById(existingEmail)).thenReturn(true);
 
         // When
         boolean result = accountService.accountExist(existingEmail);
