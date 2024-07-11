@@ -33,6 +33,13 @@ jobs:
         run: mvn test
 
       - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: target/surefire-reports
+
+      - name: Upload test report
         if: failure() && steps.run-tests.outcome == 'failure'
         uses: actions/upload-artifact@v3
         with:
@@ -42,6 +49,7 @@ jobs:
   deploy:
     needs: test
     runs-on: ubuntu-latest
+    if: success()
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -68,7 +76,7 @@ jobs:
 
   report:
     if: failure()
-    needs: deploy
+    needs: [ test, deploy ]
     runs-on: ubuntu-latest
     steps:
       - name: Output information
@@ -80,7 +88,8 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: test-report
-          path: | 
+          path: |
             target/surefire-reports/*.txt
             target/surefire-reports/*.xml
+
           
