@@ -23,5 +23,4 @@ class JacksonConfigTest {
         assertNotNull(objectMapper);
         assertTrue(objectMapper.findModules().stream().anyMatch(module -> module instanceof JavaTimeModule));
     }
-
 }
