@@ -128,12 +128,6 @@ jobs:
           name: failed-test-reports
           path: target/failed-test-reports
 
-      - name: Download failed test report
-        uses: actions/download-artifact@v3
-        with:
-          name: failed-test-reports
-          path: target/failed-test-reports
-
 
 
           
