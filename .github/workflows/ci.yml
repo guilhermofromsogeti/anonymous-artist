@@ -33,22 +33,26 @@ jobs:
         id: run-tests
         run: mvn test
 
+      - name: Generate Surefire Report
+        if: always()
+        run: mvn surefire-report:report
+
       - name: Archive all test reports
         if: always()
         uses: actions/upload-artifact@v3
         with:
           name: all-test-reports
-          path: surefire-reports
+          path: target/surefire-reports
           retention-days: 5
+          if-no-files-found: warn
 
       - name: Create failed-test-reports directory
         if: always()
         run: mkdir -p target/failed-test-reports
 
       - name: Extract failed test reports
-        if: failure()
+        if: always()
         run: |
-          mkdir -p target/failed-test-reports
           for report in $(find target/surefire-reports -name '*.txt'); do
             if grep -q 'FAILURE' "$report" || grep -q 'ERROR' "$report"; then
               cp "$report" "target/failed-test-reports/$(basename $report)"
@@ -56,15 +60,15 @@ jobs:
           done
 
       - name: Debug failed test reports directory
-        if: failure()
+        if: always()
         run: |
           echo "Contents of target/failed-test-reports directory:"
           ls -la target/failed-test-reports
 
       - name: Check for failed test reports
-        if: failure()
+        if: always()
         run: |
-          if [ "$(ls -A target/failed-test-reports)" ]; then
+          if [ -n "$(ls -A target/failed-test-reports)" ]; then
             echo "Failed tests found"
           else
             echo "No failed tests found, failing the job"
@@ -77,6 +81,8 @@ jobs:
         with:
           name: failed-test-reports
           path: target/failed-test-reports
+          retention-days: 7
+          if-no-files-found: warn
 
   deploy:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
