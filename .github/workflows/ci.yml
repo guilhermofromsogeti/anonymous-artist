@@ -38,7 +38,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: all-test-reports
-          path: target/surefire-reports
+          path: surefire-reports
           retention-days: 5
 
       - name: Create failed-test-reports directory
