@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - development
+      - feature/reports
   workflow_dispatch:
 
 jobs:
@@ -39,12 +40,22 @@ jobs:
           name: test-results
           path: target/surefire-reports
 
-      - name: Upload test report
-        if: failure() && steps.run-tests.outcome == 'failure'
+      - name: Extract failed tests reports
+        if: failure()
+        run:
+          mkdir -p failed-test-reports
+          for report in $(find target/surefire-reports -name '*.txt'); do
+            if grep -q 'FAILED' "$report"; then
+              cp "$report" "failed-test-reports/$(basename $report)"
+            fi
+          done
+
+      - name: Upload failed test report
+        if: failure()
         uses: actions/upload-artifact@v3
         with:
-          name: test-report
-          path: target/surefire-reports
+          name: failed-test-reports
+          path: failed-test-reports
 
   deploy:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
@@ -87,9 +98,7 @@ jobs:
       - name: Upload test report
         uses: actions/upload-artifact@v3
         with:
-          name: test-report
-          path: |
-            target/surefire-reports/*.txt
-            target/surefire-reports/*.xml
+          name: failed-test-reports
+          path: failed-test-reports
 
           

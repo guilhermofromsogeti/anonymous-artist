@@ -117,6 +117,10 @@
                     <reportsDirectory>
                         ${project.build.directory}/surefire-reports
                     </reportsDirectory>
+                    <reportFormat>plain</reportFormat>
+                    <reportNameSuffix>failed-tests</reportNameSuffix>
+                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                    <trimStackTrace>false</trimStackTrace>
                 </configuration>
             </plugin>
         </plugins>
