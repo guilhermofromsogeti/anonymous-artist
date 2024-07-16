@@ -39,7 +39,7 @@ jobs:
 
       - name: Archive all test reports
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact
         with:
           name: all-test-reports
           path: target/surefire-reports
@@ -77,7 +77,7 @@ jobs:
 
       - name: Upload failed test reports
         if: failure() && always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact
         with:
           name: failed-test-reports
           path: target/failed-test-reports
@@ -123,7 +123,7 @@ jobs:
 #          echo "${{ toJSON(github) }}"
 
       - name: Upload test report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact
         with:
           name: failed-test-reports
           path: target/failed-test-reports
