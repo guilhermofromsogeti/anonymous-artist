@@ -33,45 +33,45 @@ jobs:
         id: run-tests
         run: mvn test
 
-      - name: Upload test report
+      - name: Archive all test reports
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: test-results
+          name: all-test-reports
           path: target/surefire-reports
 
-      - name: Extract failed tests reports
+      - name: Extract failed test reports
         if: failure()
         run: |
-          mkdir -p failed-test-reports
+          mkdir -p target/failed-test-reports
           for report in $(find target/surefire-reports -name '*.txt'); do
             if grep -q 'FAILURE' "$report" || grep -q 'ERROR' "$report"; then
-              cp "$report" "failed-test-reports/$(basename $report)"
+              cp "$report" "target/failed-test-reports/$(basename $report)"
             fi
           done
 
       - name: Debug failed test reports directory
         if: failure()
         run: |
-          echo "Contents of failed-test-reports directory:"
-          ls -la failed-test-reports
+          echo "Contents of target/failed-test-reports directory:"
+          ls -la target/failed-test-reports
 
       - name: Check for failed test reports
         if: failure()
         run: |
-          if [ "$(ls -A failed-test-reports)" ]; then
+          if [ "$(ls -A target/failed-test-reports)" ]; then
             echo "Failed tests found"
           else
             echo "No failed tests found, failing the job"
             exit 1
           fi
 
-      - name: Upload failed test report
+      - name: Upload failed test reports
         if: failure() && always()
         uses: actions/upload-artifact@v3
         with:
           name: failed-test-reports
-          path: failed-test-reports
+          path: target/failed-test-reports
 
   deploy:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
@@ -103,7 +103,7 @@ jobs:
 
   report:
     if: failure()
-    needs: [ test, deploy ]
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - name: Output information
@@ -115,7 +115,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: failed-test-reports
-          path: failed-test-reports
+          path: target/failed-test-reports
 
 
 
