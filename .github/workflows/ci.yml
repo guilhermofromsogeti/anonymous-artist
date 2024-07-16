@@ -45,12 +45,18 @@ jobs:
         run: |
           mkdir -p failed-test-reports
           for report in $(find target/surefire-reports -name '*.txt'); do
-            if grep -q 'FAILED' "$report"; then
+            if grep -q 'FAILURE' "$report" || grep -q 'ERROR' "$report"; then
               cp "$report" "failed-test-reports/$(basename $report)"
             fi
           done
 
-      - name: Check for failes test reports
+      - name: Debug failed test reports directory
+        if: failure()
+        run: |
+          echo "Contents of failed-test-reports directory:"
+          ls -la failed-test-reports
+
+      - name: Check for failed test reports
         if: failure()
         run: |
           if [ "$(ls -A failed-test-reports)" ]; then
@@ -61,7 +67,7 @@ jobs:
           fi
 
       - name: Upload failed test report
-        if: failure()
+        if: failure() && always()
         uses: actions/upload-artifact@v3
         with:
           name: failed-test-reports
