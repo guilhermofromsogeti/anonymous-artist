@@ -41,6 +41,10 @@ jobs:
           path: target/surefire-reports
           retention-days: 5
 
+      - name: Create failed-test-reports directory
+        if: always()
+        run: mkdir -p target/failed-test-reports
+
       - name: Extract failed test reports
         if: failure()
         run: |
