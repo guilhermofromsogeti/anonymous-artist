@@ -42,13 +42,23 @@ jobs:
 
       - name: Extract failed tests reports
         if: failure()
-        run:
+        run: |
           mkdir -p failed-test-reports
           for report in $(find target/surefire-reports -name '*.txt'); do
             if grep -q 'FAILED' "$report"; then
               cp "$report" "failed-test-reports/$(basename $report)"
             fi
           done
+
+      - name: Check for failes test reports
+        if: failure()
+        run: |
+          if [ "$(ls -A failed-test-reports)" ]; then
+            echo "Failed tests found"
+          else
+            echo "No failed tests found, failing the job"
+            exit 1
+          fi
 
       - name: Upload failed test report
         if: failure()
@@ -100,5 +110,7 @@ jobs:
         with:
           name: failed-test-reports
           path: failed-test-reports
+
+
 
           
