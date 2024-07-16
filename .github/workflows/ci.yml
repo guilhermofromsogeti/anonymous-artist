@@ -104,7 +104,7 @@ jobs:
 
   report:
     if: failure()
-    needs: test
+    needs: [ test, build ]
     runs-on: ubuntu-latest
     steps:
       - name: Output information
