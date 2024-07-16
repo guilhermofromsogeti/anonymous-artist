@@ -39,6 +39,7 @@ jobs:
         with:
           name: all-test-reports
           path: target/surefire-reports
+          retention-days: 5
 
       - name: Extract failed test reports
         if: failure()
