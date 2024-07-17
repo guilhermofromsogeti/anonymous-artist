@@ -5,6 +5,8 @@ on:
     branches:
       - main
       - development
+      - feature/containers
+
   workflow_dispatch:
 
 jobs:
@@ -49,11 +51,81 @@ jobs:
           retention-days: 5
           if-no-files-found: warn
 
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Get code
+        uses: actions/checkout@v4
+
+      - name: Set Up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'corretto'
+          java-version: '21'
+
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Build the project
+        run: mvn package
+
+      - name: Set up Podman
+        run: |
+          sudo sh -c "echo 'deb http://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_$(lsb_release -rs)/ /' > /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list"
+          wget -nv https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable/xUbuntu_$(lsb_release -rs)/Release.key -O Release.key
+          sudo apt-key add - < Release.key
+          sudo apt-get update -qq
+          sudo apt-get -qq -y install podman
+
+      - name: Build Docker image
+        run: podman build -t your-image-name:latest .
+
+
+  publish:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Podman
+        run: |
+          sudo sh -c "echo 'deb http://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_$(lsb_release -rs)/ /' > /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list"
+          wget -nv https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable/xUbuntu_$(lsb_release -rs)/Release.key -O Release.key
+          sudo apt-key add - < Release.key
+          sudo apt-get update -qq
+          sudo apt-get -qq -y install podman
+
+      - name: Docker meta (for metadata generation)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/your-image-name
+          tags: type=sha
+
+      - name: Login to GHCR
+        run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | podman login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+
+      - name: Build container
+        run: |
+          podman build -t ${{ steps.meta.outputs.tags }} .
+
+      - name: Push container
+        run: |
+          podman push ${{ steps.meta.outputs.tags }}
 
   deploy:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
-    needs: test
+    needs: [test, build]
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -71,9 +143,6 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
-
-      - name: Build with Maven
-        run: mvn -B package --file pom.xml
 
       - name: Deploy
         run: echo "Deploying..."
