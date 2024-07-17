@@ -37,6 +37,10 @@ jobs:
         if: always()
         run: mvn surefire-report:report
 
+      - name: Create failed-test-reports directory
+        if: always()
+        run: mkdir -p target/failed-test-reports
+
       - name: Archive all test reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -90,7 +94,7 @@ jobs:
           java-version: '21'
 
       - name: Download all test reports
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
             name: all-test-reports
             path: target/surefire-reports
