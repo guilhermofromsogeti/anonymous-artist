@@ -21,7 +21,7 @@ jobs:
           java-version: '21'
 
       - name: Cache Maven packages
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
@@ -32,19 +32,23 @@ jobs:
         id: run-tests
         run: mvn test
 
-      - name: Upload test report
+      - name: Generate Surefire Report
         if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-results
-          path: target/surefire-reports
+        run: mvn surefire-report:report
 
-      - name: Upload test report
-        if: failure() && steps.run-tests.outcome == 'failure'
-        uses: actions/upload-artifact@v3
+      - name: Create failed-test-reports directory
+        if: always()
+        run: mkdir -p target/failed-test-reports
+
+      - name: Archive all test reports
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: test-report
+          name: all-test-reports
           path: target/surefire-reports
+          retention-days: 5
+          if-no-files-found: warn
+
 
   deploy:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
@@ -61,7 +65,7 @@ jobs:
           java-version: '21'
 
       - name: Cache Maven packages
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
@@ -79,17 +83,57 @@ jobs:
     needs: [ test, deploy ]
     runs-on: ubuntu-latest
     steps:
-      - name: Output information
-        run: |
-          echo "something went wrong"
-#          echo "${{ toJSON(github) }}"
+      - name: Get code
+        uses: actions/checkout@v4
 
-      - name: Upload test report
-        uses: actions/upload-artifact@v3
+      - name: Set Up JDK 21
+        uses: actions/setup-java@v4
         with:
-          name: test-report
-          path: |
-            target/surefire-reports/*.txt
-            target/surefire-reports/*.xml
+          distribution: 'corretto'
+          java-version: '21'
+
+      - name: Download all test reports
+        uses: actions/download-artifact@v4
+        with:
+            name: all-test-reports
+            path: target/surefire-reports
+
+      - name: Download all test reports
+        uses: actions/download-artifact@v4
+        with:
+          name: all-test-reports
+          path: target/surefire-reports
+
+      - name: Extract failed test reports
+        run: |
+          mkdir -p target/failed-test-reports
+          for report in $(find target/surefire-reports -name '*.txt'); do
+            if grep -q 'FAILURE' "$report" || grep -q 'ERROR' "$report"; then
+              cp "$report" "target/failed-test-reports/$(basename $report)"
+            fi
+          done
+
+      - name: Debug failed test reports directory
+        run: |
+          echo "Contents of target/failed-test-reports directory:"
+          ls -la target/failed-test-reports
+
+      - name: Check for failed test reports
+        run: |
+          if [ -n "$(ls -A target/failed-test-reports)" ]; then
+            echo "Failed tests found"
+          else
+            echo "No failed tests found, failing the job"
+            exit 1
+          fi
+
+      - name: Upload failed test reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: failed-test-reports
+          path: target/failed-test-reports
+          retention-days: 5
+          if-no-files-found: warn
+
 
           
