@@ -46,43 +46,6 @@ jobs:
           retention-days: 5
           if-no-files-found: warn
 
-      - name: Create failed-test-reports directory
-        if: always()
-        run: mkdir -p target/failed-test-reports
-
-      - name: Extract failed test reports
-        if: always()
-        run: |
-          for report in $(find target/surefire-reports -name '*.txt'); do
-            if grep -q 'FAILURE' "$report" || grep -q 'ERROR' "$report"; then
-              cp "$report" "target/failed-test-reports/$(basename $report)"
-            fi
-          done
-
-      - name: Debug failed test reports directory
-        if: always()
-        run: |
-          echo "Contents of target/failed-test-reports directory:"
-          ls -la target/failed-test-reports
-
-      - name: Check for failed test reports
-        if: always()
-        run: |
-          if [ -n "$(ls -A target/failed-test-reports)" ]; then
-            echo "Failed tests found"
-          else
-            echo "No failed tests found, failing the job"
-            exit 1
-          fi
-
-      - name: Upload failed test reports
-        if: failure() && always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: failed-test-reports
-          path: target/failed-test-reports
-          retention-days: 5
-          if-no-files-found: warn
 
   deploy:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
@@ -117,18 +80,50 @@ jobs:
     needs: [ test, deploy ]
     runs-on: ubuntu-latest
     steps:
-      - name: Output information
+      - name: Get code
+        uses: actions/checkout@v4
+
+      - name: Set Up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'corretto'
+          java-version: '21'
+
+      - name: Download all test reports
+        uses: actions/download-artifact@v4
+        with:
+          name: all-test-reports
+          path: target/surefire-reports
+
+      - name: Extract failed test reports
         run: |
-          echo "something went wrong"
+          for report in $(find target/surefire-reports -name '*.txt'); do
+            if grep -q 'FAILURE' "$report" || grep -q 'ERROR' "$report"; then
+              cp "$report" "target/failed-test-reports/$(basename $report)"
+            fi
+          done
+
+      - name: Debug failed test reports directory
+        run: |
+          echo "Contents of target/failed-test-reports directory:"
+          ls -la target/failed-test-reports
+
+      - name: Check for failed test reports
+        run: |
+          if [ -n "$(ls -A target/failed-test-reports)" ]; then
+            echo "Failed tests found"
+          else
+            echo "No failed tests found, failing the job"
+            exit 1
+          fi
 
       - name: Upload failed test reports
-        if: failure() && always()
         uses: actions/upload-artifact@v4
         with:
           name: failed-test-reports
           path: target/failed-test-reports
           retention-days: 5
-          if-no-files-found: warns
+          if-no-files-found: warn
 
 
           
