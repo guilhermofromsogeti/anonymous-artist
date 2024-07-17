@@ -71,7 +71,7 @@ class AccountServiceTest {
         accountService.addAuthority(existingAccount.getEmail(), "ROLE_USER");
 
         // Then
-        verify(accountRepository, times(3)).findById(existingAccount.getEmail());
+        verify(accountRepository, times(1)).findById(existingAccount.getEmail());
         verify(accountRepository, times(1)).save(existingAccount);
         verify(accountRepository).save(any(Account.class));
         verifyNoMoreInteractions(accountRepository);
