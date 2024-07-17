@@ -107,6 +107,7 @@ jobs:
 
       - name: Extract failed test reports
         run: |
+          mkdir -p target/failed-test-reports
           for report in $(find target/surefire-reports -name '*.txt'); do
             if grep -q 'FAILURE' "$report" || grep -q 'ERROR' "$report"; then
               cp "$report" "target/failed-test-reports/$(basename $report)"
