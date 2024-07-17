@@ -81,7 +81,7 @@ jobs:
         with:
           name: failed-test-reports
           path: target/failed-test-reports
-          retention-days: 7
+          retention-days: 5
           if-no-files-found: warn
 
   deploy:
@@ -120,13 +120,15 @@ jobs:
       - name: Output information
         run: |
           echo "something went wrong"
-#          echo "${{ toJSON(github) }}"
 
-      - name: Upload test report
+      - name: Upload failed test reports
+        if: failure() && always()
         uses: actions/upload-artifact@v4
         with:
           name: failed-test-reports
           path: target/failed-test-reports
+          retention-days: 5
+          if-no-files-found: warns
 
 
           
