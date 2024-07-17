@@ -90,6 +90,12 @@ jobs:
           java-version: '21'
 
       - name: Download all test reports
+        uses: actions/download-artifact@v3
+        with:
+            name: all-test-reports
+            path: target/surefire-reports
+
+      - name: Download all test reports
         uses: actions/download-artifact@v4
         with:
           name: all-test-reports
